@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 24k
 
 > 24k project
@@ -19,3 +20,6 @@ npm run build --report
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+=======
+# Auditing-System
+>>>>>>> 19418122a6d49ba9c4fa8a264de002cf6927109d

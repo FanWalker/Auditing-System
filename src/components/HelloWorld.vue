@@ -3,29 +3,27 @@
     <router-link to="/search">Go to search</router-link>
     <div class="message"><p>{{ msg }}</p></div>
     <div class="form-data">
-      <form action="">
-        <div class="wrap">
-          <label for="" class="text-name">姓名<span>*</span></label>
-          <input type="text" v-model="person.name">
+      <div class="wrap">
+        <label for="" class="text-name">姓名<span>*</span></label>
+        <input type="text" v-model="user.name">
+      </div>
+      <div class="wrap">
+        <label for="" class="text-name">手机号<span>*</span></label>
+        <input type="text" v-model="user.phoneNumber">
+      </div>
+      <div class="wrap">
+        <label for="" class="text-name">身份证号码<span>*</span></label>
+        <input type="text" v-model="user.IDCartNumber">
+      </div>
+      <div class="wrap">
+        <label for="" class="text-name">验证码<span style="color:#fff">*</span></label>
+        <div class="verification-code">
+          <input type="text" v-model="inputCode">
+          <input type="text" readonly="readonly" id="checkCode" style="width:50px;" v-on:click="createCode" v-bind:value="codevalue">
         </div>
-        <div class="wrap">
-          <label for="" class="text-name">手机号<span>*</span></label>
-          <input type="text" v-model="person.phoneNumber">
-        </div>
-        <div class="wrap">
-          <label for="" class="text-name">身份证号码<span>*</span></label>
-          <input type="text" v-model="person.IDCard">
-        </div>
-        <div class="wrap">
-          <label for="" class="text-name">验证码<span style="color:#fff">*</span></label>
-          <div class="verification-code">
-            <input type="text" v-model="inputCode">
-            <input type="text" readonly="readonly" id="checkCode" style="width:50px;" v-on:click="createCode" v-bind:value="codevalue">
-          </div>
-        </div>
-      </form>
+      </div>
     </div>
-    <div class="submit-btn"><button type="button" class="btn btn-info" @click="checkCode">提交</button></div>
+    <div class="submit-btn"><button type="button" class="btn btn-info" @click="submitInfo">提交</button></div>
   </div>
 </template>
 
@@ -37,10 +35,10 @@ export default {
       msg: '您正在参与广州途客[广州]猎德站站的骑手审核，请正确填写并提交一下表格，以免耽误入职进度',
       code: '',
       inputCode: '',
-      person: {
+      user: {
         name: '',
         phoneNumber: '',
-        IDCard: ''
+        IDCartNumber: ''
       }
     }
   },
@@ -67,6 +65,18 @@ export default {
       else {
         alert('fail')
       }
+    },
+    submitInfo: function() {
+      this.$http({
+        url: '/user/new',
+        method: 'POST',
+        params: {
+          user: this.user
+        }
+      }).then((res) => {
+        let data = res.data;
+        console.log(data);
+      })
     }
   },
   computed: {
