@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import searchVue from '@/components/search'
 import admin from '@/components/admin'
+import parent from '@/components/parent'
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ export default new Router({
         path: '/admin',
         name: 'admin',
         component: admin
+    },
+    {
+      path: '/page',
+      name: 'page',
+      component: parent
     }
   ]
 })

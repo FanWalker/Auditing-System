@@ -1,6 +1,6 @@
 <template>
   <div class="identity">
-    <router-link to="/search">Go to search</router-link>
+    <router-link to="/page">Go to search</router-link>
     <div class="message"><p>{{ msg }}</p></div>
     <div class="form-data">
       <div class="wrap">

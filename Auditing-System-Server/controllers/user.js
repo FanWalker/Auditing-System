@@ -22,14 +22,33 @@ exports.insert = function(req, res){
         }
     })
 }
-exports.list = function(req, res){
-    User.fetch(function(err, users){
+exports.showlist = function(req, res){
+    var page = parseInt(req.query.p, 10) || 0;   //当前页码
+    var state = req.query.state;                // 分类 有通过、不通过、待审核
+    var count = 2;                              //每一页显示的数据条数
+    var index = page * count;                      // 从index开始 到 index+5 结束
+    var totalPage;                              // 总共有多少页
+
+    /*User.fetch(function(err, users){
         if(err){
             console.log(err);
-        }else{
+        }
+        else {
             res.send(users);
         }
-    })
+    })*/
+
+    User.find({state:state})                //找到 对应状态的user
+        .exec(function(err, users){
+            if(err) {
+                console.log(err);
+            }
+            else{
+                var results = users.slice(index, index+count);      //返回count条数据
+                totalPage = Math.ceil(users.length/count);          //返回总共有多少页
+                res.send({users: results, totalPage: totalPage});   
+            }
+        })
 }
 exports.update = function(req, res) {
     var curUserName = req.query.userName,

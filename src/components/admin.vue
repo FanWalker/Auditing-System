@@ -13,25 +13,11 @@
                     <span class="user-text btn" @click="selectChoice($event)">通过</span>
                 </div>
                 <div class="userList">
-                    <div class="userContainer" v-for='user in users' :style="{display:not_research}">
-                        <div v-if="user.state== choice">
-                            <div class="diplay-info">
-                                <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
-                                <span class="state">{{user.state}}</span>
-                                <span class="admin-btn btn" style="background-color:#5bc0de" @click="showConfirmFrame($event,'pass')">通过</span>
-                                <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
-                            </div>
-                            <div class="user-info" v-bind:style="{display: isDisplay}">
-                                <p>手机号码：{{ user.phoneNumber }}</p>
-                                <p>身份证号：{{ user.IDCartNumber}}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="userContainer" v-for='user in searchResult' :style="{display: had_research}">
+                    <div class="userContainer" v-for='(user,index) in users' :style="{display:not_research}">
                         <div class="diplay-info">
                             <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
                             <span class="state">{{user.state}}</span>
-                            <span class="admin-btn btn" style="background-color:#5bc0de" @click="showConfirmFrame($event,'pass')">通过</span>
+                            <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
                             <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
                         </div>
                         <div class="user-info" v-bind:style="{display: isDisplay}">
@@ -39,9 +25,19 @@
                             <p>身份证号：{{ user.IDCartNumber}}</p>
                         </div>
                     </div>
-                </div>
-                <div class="search-list">
-                    
+                    <div class="userContainer" v-for='user in searchResult' :style="{display: had_research}">
+                        <div class="diplay-info">
+                            <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
+                            <span class="state">{{user.state}}</span>
+                            <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
+                            <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                        </div>
+                        <div class="user-info" v-bind:style="{display: isDisplay}">
+                            <p>手机号码：{{ user.phoneNumber }}</p>
+                            <p>身份证号：{{ user.IDCartNumber}}</p>
+                        </div>
+                    </div>
+                    <v-pagination :total="total" :current-page='current' @pagechange="pagechange"></v-pagination>
                 </div>
                 <div class="confirmFrame" v-bind:style="{display: isConfirm}">
                     <div class="confirm-wrap">
@@ -58,93 +54,121 @@
 </template>
 
 <script>
-    export default {
-        data() {
-            return {
-                isDisplay: 'none',
-                isConfirm: 'none',
-                isMarklayer: 'none',
-                choice: '待审核',
-                curUserName: '',
-                searchName: '',
-                not_research: '',
-                had_research: 'none',
-                passText: '',
-                users: [],
-                searchResult: []
-            }
-        },
-        methods: {
-            showDisplayInfo: function(e) {
-                let current = $(e.target).parent().siblings()[0];
-                let $current = $(current);
-                if($current.css('display') === 'none'){
-                    $current.css('display','');
-                }
-                else {
-                    $current.css('display','none');
-                }
-            },
-            showConfirmFrame: function(e,str) {
-                let cur_user = $(e.target).siblings()[0],
-                    $cur_user = $(cur_user);
-                this.curUserName = $cur_user.text();
-                this.isConfirm = '';
-                this.isMarklayer = '';
-                if(str == 'pass'){
-                    this.passText = '通过'
-                }else {
-                    this.passText = '不通过'
-                }
-            },
-            closeConfirmFrame: function() {
-                this.isConfirm = 'none';
-                this.isMarklayer = 'none';
-            },
-            confirmInfo: function(user, state) {
-                this.$http({
-                    url: '/user/admin/update',
-                    method: 'POST',
-                    params: {
-                        userName: user,
-                        state: state
-                    }
-                }).then((res)=>{
-                    this.users = res.data;
-                    this.closeConfirmFrame();
-                })
-            },
-            selectChoice: function(e) {
-                this.choice = $(e.target).text();
-                $(e.target).siblings().removeClass('current');
-                $(e.target).addClass('current');
-            },
-            search: function(){
-                this.searchResult = [];
-                this.not_research = 'none';
-                this.had_research = '';
-                $(".list-head").children().removeClass('current');
-                this.$http({
-                    url: '/user/admin/search',
-                    method: 'GET',
-                    params: {
-                        userName: this.searchName
-                    }
-                }).then((res)=>{
-                    this.searchResult.push(res.data);
-                    console.log(this.searchResult);
-                })
-            }
-        },
-        mounted: function() {
-            this.$http({
-                url: '/user/admin',
-                method: 'GET'
-            }).then((res) => {
-                this.users = res.data;
-            })
+import pagination from '@/components/pagination'
+export default {
+    data() {
+        return {
+            isDisplay: 'none',
+            isConfirm: 'none',
+            isMarklayer: 'none',
+            choice: '待审核',
+            curUserName: '',
+            searchName: '',
+            not_research: '',
+            had_research: 'none',
+            passText: '',
+            users: [],
+            searchResult: [],
+            total: 0,     // 记录总条数
+            display: 2,   // 每页显示条数
+            current: 1,   // 当前的页数
         }
+    },
+    methods: {
+        showDisplayInfo: function(e) {
+            let current = $(e.target).parent().siblings()[0];
+            let $current = $(current);
+            if($current.css('display') === 'none'){
+                $current.css('display','');
+            }
+            else {
+                $current.css('display','none');
+            }
+        },
+        showConfirmFrame: function(e,str) {
+            let cur_user = $(e.target).siblings()[0],
+                $cur_user = $(cur_user);
+            this.curUserName = $cur_user.text();
+            this.isConfirm = '';
+            this.isMarklayer = '';
+            if(str == 'pass'){
+                this.passText = '通过'
+            }else {
+                this.passText = '不通过'
+            }
+        },
+        closeConfirmFrame: function() {
+            this.isConfirm = 'none';
+            this.isMarklayer = 'none';
+        },
+        confirmInfo: function(user, state) {
+            this.$http({
+                url: '/user/admin/update',
+                method: 'POST',
+                params: {
+                    userName: user,
+                    state: state
+                }
+            }).then((res)=>{
+                this.users = res.data;
+                this.closeConfirmFrame();
+            })
+        },
+        selectChoice: function(e) {
+            var _self = this;
+            _self.not_research = '';
+            _self.had_research = 'none';
+            _self.choice = $(e.target).text();
+            $(e.target).siblings().removeClass('current');
+            $(e.target).addClass('current');
+            _self.$http({
+                url: '/user/admin',
+                method: 'GET',
+                params: {
+                    state: _self.choice
+                }
+            }).then((res) => {
+                _self.users = res.data.users;
+            })
+        },
+        search: function(){
+            this.searchResult = [];
+            this.not_research = 'none';
+            this.had_research = '';
+            $(".list-head").children().removeClass('current');
+            this.$http({
+                url: '/user/admin/search',
+                method: 'GET',
+                params: {
+                    userName: this.searchName
+                }
+            }).then((res)=>{
+                this.searchResult.push(res.data);
+            })
+        },
+        pagechange:function(currentPage){
+         console.log(currentPage);
+         // ajax请求, 向后台发送 currentPage, 来获取对应的数据
+
+       }
+    },
+    mounted: function() {
+        this.$http({
+            url: '/user/admin',
+            method: 'GET',
+            params: {
+                state: "待审核"
+            }
+        }).then((res) => {
+            this.users = res.data.users;
+            this.total = res.data.totalPage;
+            console.log(this.total);
+        })
+    },
+    components: {
+          'v-pagination': pagination,
     }
+}
 </script>
 
 <style scoped>
