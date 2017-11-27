@@ -3,40 +3,21 @@
         <h4 class="search-title">审核结果搜索</h4>
         <div class="search-content">
             <div class="search-nav">
-                <input type="text" class="search-frame ">
-                <button class="search-btn btn btn-info">搜索</button>
+                <input type="text" class="search-frame" v-model="searchName">
+                <button class="search-btn btn btn-info" @click="search">搜索</button>
             </div>
-            <div class="search-result" style="display:none">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="name-text">姓名</th>
-                            <th class="result-text">审核结果</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-striped">
-                        <tr>
-                            <td class="userName">1、郭靖</td>
-                            <td class="result">审核通过</td>
-                        </tr>
-                        <tr>
-                            <td class="userName">2、周芷若</td>
-                            <td class="result">审核通过</td>
-                        </tr>
-                        <tr>
-                            <td class="userName">3、赵敏</td>
-                            <td class="result">审核通过</td>
-                        </tr>
-                        <tr>
-                            <td class="userName">4、张无忌</td>
-                            <td class="result">审核通过</td>
-                        </tr>
-                        <tr>
-                            <td class="userName">5、洪七公</td>
-                            <td class="result">审核通过</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="search-result"  v-if="searchResult.length>0">
+                <div class="search_head">
+                    <div class="userName">姓名</div>
+                    <div class="userState">审核结果</div>
+                </div>
+               <div v-for="user in searchResult">
+                   <div class="userName">{{user.name}}</div>
+                   <div class="userState">{{user.state}}</div>
+               </div>
+            </div>
+            <div class="errInfo">
+                {{errInfo}}
             </div>
         </div>
     </div>
@@ -47,7 +28,30 @@
         name: 'searchVue',
         data() {
             return {
-
+                searchResult: [],
+                searchName: '',
+                errInfo: ''
+            }
+        },
+        methods: {
+            search: function(){
+                this.searchResult = [];
+                this.$http({
+                    url: '/user/admin/search',
+                    method: 'GET',
+                    params: {
+                        userName: this.searchName
+                    }
+                }).then((res)=>{
+                    if(res.data == ''){
+                        this.errInfo = '查无此人，请重新输入！'
+                        $(".search-frame").focus();
+                    }
+                    else{
+                        this.searchResult.push(res.data);
+                        console.log(this.searchResult.length)
+                    }
+                    })
             }
         }
     }
@@ -84,17 +88,18 @@
         margin: 30px auto;
         padding: 10px 20px;
     }
-    table thead th {
-        text-align: center;
-    }
-    .result-text {
-        text-align: right;
-    }
-    .userName {
-        width: 6em;
+    .userName, .userState {
+        width: 20%;
+        display: inline-block;
         text-align: left;
+        margin: 2% 5%;
     }
-    .result {
-        text-align: right;
+    .errInfo {
+        width: 50%;
+        height: 100%;
+        margin: 0 13%;
+        color: #ff5533;
+        font-size: 0.9rem;
+        border: none;
     }
 </style>

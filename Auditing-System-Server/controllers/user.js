@@ -25,7 +25,7 @@ exports.insert = function(req, res){
 exports.showlist = function(req, res){
     var page = parseInt(req.query.p, 10) || 0;   //当前页码
     var state = req.query.state;                // 分类 有通过、不通过、待审核
-    var count = 2;                              //每一页显示的数据条数
+    var count = 10;                              //每一页显示的数据条数
     var index = page * count;                      // 从index开始 到 index+5 结束
     var totalPage;                              // 总共有多少页
 
@@ -52,21 +52,23 @@ exports.showlist = function(req, res){
 }
 exports.update = function(req, res) {
     var curUserName = req.query.userName,
-        state = req.query.state;
-    var updateUser;
+        updateState = req.query.state,
+        originstate = req.query.originstate;
 
-    User.findOneAndUpdate({name: curUserName},{state:state},function(err, user){
+    User.findOneAndUpdate({name: curUserName},{state:updateState},function(err, user){
         if(err){
             console.log(err);
         }
         else {
-            User.fetch(function(err, users){
-                if(err){
-                    console.log(err);
-                }else{
-                    res.send(users);
-                }
-            })
+            User.find({state: originstate})
+                .exec(function(err, users){
+                    if(err){
+                        console.log(err)
+                    }
+                    else {
+                        res.send(users);
+                    }
+                })
         }
     });
 }
@@ -75,7 +77,7 @@ exports.search = function (req, res) {
     var searchName = req.query.userName;
 
     User.findOne({name: searchName},function(err, user){
-        if(err) {
+        if(user == '') {
             res.send("查找失败！");
         }
         else {

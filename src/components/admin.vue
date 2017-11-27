@@ -20,7 +20,7 @@
                             <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
                             <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
                         </div>
-                        <div class="user-info" v-bind:style="{display: isDisplay}">
+                        <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
                             <p>身份证号：{{ user.IDCartNumber}}</p>
                         </div>
@@ -32,14 +32,14 @@
                             <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
                             <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
                         </div>
-                        <div class="user-info" v-bind:style="{display: isDisplay}">
+                        <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
                             <p>身份证号：{{ user.IDCartNumber}}</p>
                         </div>
                     </div>
-                    <v-pagination :total="total" :current-page='current' @pagechange="pagechange"></v-pagination>
+                    <v-pagination  :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
                 </div>
-                <div class="confirmFrame" v-bind:style="{display: isConfirm}">
+                <div class="confirmFrame" v-bind:style="{display: valConfirm}">
                     <div class="confirm-wrap">
                         <span class="close" @click="closeConfirmFrame">关闭</span>
                         <p>确定让{{curUserName}}{{passText}}吗</p>
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div class="marsklayer" v-bind:style="{display: isMarklayer}"></div>
+        <div class="marsklayer" v-bind:style="{display: valMarklayer}"></div>
     </div>
 </template>
 
@@ -58,9 +58,9 @@ import pagination from '@/components/pagination'
 export default {
     data() {
         return {
-            isDisplay: 'none',
-            isConfirm: 'none',
-            isMarklayer: 'none',
+            valDisplay: 'none',
+            valConfirm: 'none',
+            valMarklayer: 'none',
             choice: '待审核',
             curUserName: '',
             searchName: '',
@@ -70,8 +70,7 @@ export default {
             users: [],
             searchResult: [],
             total: 0,     // 记录总条数
-            display: 2,   // 每页显示条数
-            current: 1,   // 当前的页数
+            curPage: 1,   // 当前的页数
         }
     },
     methods: {
@@ -89,8 +88,8 @@ export default {
             let cur_user = $(e.target).siblings()[0],
                 $cur_user = $(cur_user);
             this.curUserName = $cur_user.text();
-            this.isConfirm = '';
-            this.isMarklayer = '';
+            this.valConfirm = '';
+            this.valMarklayer = '';
             if(str == 'pass'){
                 this.passText = '通过'
             }else {
@@ -98,20 +97,22 @@ export default {
             }
         },
         closeConfirmFrame: function() {
-            this.isConfirm = 'none';
-            this.isMarklayer = 'none';
+            this.valConfirm = 'none';
+            this.valMarklayer = 'none';
         },
-        confirmInfo: function(user, state) {
+        confirmInfo: function(user, newstate) {
             this.$http({
                 url: '/user/admin/update',
                 method: 'POST',
                 params: {
                     userName: user,
-                    state: state
+                    state: newstate,
+                    originstate: this.choice
                 }
             }).then((res)=>{
                 this.users = res.data;
-                this.closeConfirmFrame();
+                console.log(this.users[0].name);
+                this.closeConfirmFrame()
             })
         },
         selectChoice: function(e) {
@@ -129,6 +130,7 @@ export default {
                 }
             }).then((res) => {
                 _self.users = res.data.users;
+                this.total = res.data.totalPage;
             })
         },
         search: function(){
@@ -147,10 +149,19 @@ export default {
             })
         },
         pagechange:function(currentPage){
-         console.log(currentPage);
-         // ajax请求, 向后台发送 currentPage, 来获取对应的数据
-
-       }
+             // ajax请求, 向后台发送 currentPage, 来获取对应的数据
+             console.log("当前是第"+currentPage+"页");
+            this.$http({
+                url: '/user/admin',
+                method: 'GET',
+                params: {
+                    state: this.choice,
+                    p: currentPage-1
+                }
+            }).then((res) => {
+                this.users = res.data.users;
+            })
+        }
     },
     mounted: function() {
         this.$http({
@@ -162,7 +173,6 @@ export default {
         }).then((res) => {
             this.users = res.data.users;
             this.total = res.data.totalPage;
-            console.log(this.total);
         })
     },
     components: {

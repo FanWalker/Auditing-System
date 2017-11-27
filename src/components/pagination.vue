@@ -23,10 +23,6 @@
         type: Number,
         default: 0
       },
-      display: {// 每页显示条数
-        type: Number,
-        default: 10
-      },
       currentPage: {// 当前页码
         type: Number,
         default: 1
@@ -38,14 +34,18 @@
           v = v > 0 ? v : 5;
           return v % 2 === 1 ? v : v + 1;
         }
-      }
+      },
+
     },
     computed: {
       page: function () { // 总页数
-        return Math.ceil(this.total / this.display);
+        return this.total;
       },
       grouplist: function () { // 获取分页页码
-        var len = this.page, temp = [], list = [], count = Math.floor(this.pagegroup / 2), center = this.current;
+        var len = this.page, 
+        temp = [], list = [], 
+        count = Math.floor(this.pagegroup / 2), 
+        center = this.current;
         if (len <= this.pagegroup) {
           while (len--) {
             temp.push({text: this.page - len, val: this.page - len});
@@ -88,9 +88,11 @@
 
 <style scoped>
   .pagination {
+    position: fixed;
     overflow: hidden;
     display: table;
-    margin: 0 auto;
+    bottom: 2%;
+    left: 25%;
     /*width: 100%;*/
     height: 50px;
 }
