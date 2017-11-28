@@ -1,6 +1,6 @@
 var User = require('../models/user');
 
-exports.insert = function(req, res){
+exports.insert = function(req, res){      //添加用户
     var _user = JSON.parse(req.query.user);
 
     User.findOne({name: _user.name}, function(err,user){
@@ -29,15 +29,6 @@ exports.showlist = function(req, res){
     var index = page * count;                      // 从index开始 到 index+5 结束
     var totalPage;                              // 总共有多少页
 
-    /*User.fetch(function(err, users){
-        if(err){
-            console.log(err);
-        }
-        else {
-            res.send(users);
-        }
-    })*/
-
     User.find({state:state})                //找到 对应状态的user
         .exec(function(err, users){
             if(err) {
@@ -50,7 +41,7 @@ exports.showlist = function(req, res){
             }
         })
 }
-exports.update = function(req, res) {
+exports.update = function(req, res) {            //更新用户状态
     var curUserName = req.query.userName,
         updateState = req.query.state,
         originstate = req.query.originstate;
@@ -73,7 +64,7 @@ exports.update = function(req, res) {
     });
 }
 
-exports.search = function (req, res) {
+exports.search = function (req, res) {      //用户的查询
     var searchName = req.query.userName;
 
     User.findOne({name: searchName},function(err, user){

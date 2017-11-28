@@ -19,7 +19,7 @@
         <label for="" class="text-name">验证码<span style="color:#fff">*</span></label>
         <div class="verification-code">
           <input type="text" v-model="inputCode">
-          <input type="text" readonly="readonly" id="checkCode" style="width:50px;" v-on:click="createCode" v-bind:value="codevalue">
+          <div class="yanzhengma"><img :src="dataUrl" alt=""></div>
         </div>
       </div>
     </div>
@@ -35,6 +35,7 @@ export default {
       msg: '您正在参与广州途客[广州]猎德站站的骑手审核，请正确填写并提交一下表格，以免耽误入职进度',
       code: '',
       inputCode: '',
+      dataUrl: '',
       user: {
         name: '',
         phoneNumber: '',
@@ -43,30 +44,8 @@ export default {
     }
   },
   methods: {
-    createCode: function(){
-      this.code = '';
-      var codeLength = 4;//验证码的长度 
-      var checkCode = document.getElementById("checkCode"); 
-      var selectChar = new Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  
-             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',  
-             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',  
-             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',  
-             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
-    
-      for(var i=0; i<4; i++){
-        var charIndex = Math.floor(Math.random()*selectChar.length);
-        this.code += selectChar[charIndex]; 
-      }
-    },
-    checkCode: function() {
-      if(this.inputCode.toLowerCase() == this.code.toLowerCase()){
-        alert('验证成功')
-      }
-      else {
-        alert('fail')
-      }
-    },
     submitInfo: function() {
+      this.checkCode();
       this.$http({
         url: '/user/new',
         method: 'POST',
@@ -79,9 +58,22 @@ export default {
       })
     }
   },
+  mounted: function(){
+    this.$http({
+        url: '/user/Verification',
+        method: 'GET',
+        headers: {
+        'Content-Type': 'image/bmp'
+      }
+      }).then((res) => {
+        var img = res.data;
+        this.dataUrl = img.toString('base64');
+        console.log(this.dataUrl);
+      })
+    },
   computed: {
     codevalue: function(){
-      return this.code;
+      
     }
   }
 }
@@ -89,9 +81,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  input {
-    border: none;
-  }
   span {
     color: #ec150e
   }
@@ -105,45 +94,69 @@ export default {
   .message p{
     text-align:justify;
     text-justify:inter-ideograph;
-    margin: 0.5em 0;
-    letter-spacing: 0px;
+    margin: 1rem;
+    letter-spacing: 1px;
     line-height: 24px;
   }
   .form-data {
-    min-width: 400px;
+    font-size:  1rem;
+    overflow: hidden;
+    background: #fff;
   }
   .wrap {
-    width: 70%;
-    height: 35%;
-    margin-top: 20px;
+    width: 100%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 20px 0;
+    border-bottom: 1px solid #eee;
     padding: 0px;
   }
   .text-name {
-    width: 8rem;
-    margin-right: 10px;
-    text-align: right;
+    margin-left: .85rem;
+    float: left;
+    width: 30%;
+    text-align: left;
+  }
+  .wrap input {
+    width: 65%;
+    height: 2rem;
+    border: none;
+    outline: none;
   }
   .verification-code  {
     position: relative;
     display: inline-block;
-    width: 170px;
-    height: 20px;
+    width: 65%;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    margin: 0;
   }
-  .verification-code input:nth-child(1) {
+  .verification-code input {
     display: inline-block;
     float: left;
-    width: 100px;
+    width: 60%;
+    margin: 0;
+    float: left;
   }
-  #checkCode {
-    background-color: #0A0756;
+  .yanzhengma {
+    float: left;
+    width: 35%;
+    height: 30px;
+    padding: 0;
+    margin: 0;
   }
   .submit-btn {
-    height: 34px;
-    width: 50%;
-    margin: 10px auto;
+    height: 3rem;
+    width: 97%;
+    box-sizing: border-box;
+    margin: 20px auto;
     line-height: 34px;
   }
   .submit-btn button{
     width: 100%;
+    font-size: 1.3rem;
+    background: #44d5cf;
+    border: none;
   }
 </style>

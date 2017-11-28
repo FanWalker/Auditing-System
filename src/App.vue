@@ -23,10 +23,14 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  overflow: hidden;
 }
 #title {
-  margin-top: -30px;
-  height: 1.6em;
+  margin-top: 2px;
+  vertical-align: middle;
+  height: 3rem;
+  width: 100%;
+  line-height: 3rem;  
+  background: #fff;
 }
 </style>
