@@ -85,14 +85,19 @@
         text-align: center;
     }
     .search-result {
-        margin: 30px auto;
-        padding: 10px 20px;
+        margin: 2rem 0;
+        padding: 0;
+        background: #fff;
+    }
+    .search-result .search_head {
+        font-size: 1rem;
+        font-weight: bold;
     }
     .userName, .userState {
         width: 20%;
         display: inline-block;
         text-align: left;
-        margin: 2% 5%;
+        margin: 1rem 2rem;
     }
     .errInfo {
         width: 50%;

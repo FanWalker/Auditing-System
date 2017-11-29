@@ -29,9 +29,9 @@
       },
       pagegroup: {// 分页条数
         type: Number,
-        default: 5,
+        default: 3,
         coerce: function (v) {
-          v = v > 0 ? v : 5;
+          v = v > 0 ? v : 3;
           return v % 2 === 1 ? v : v + 1;
         }
       },
@@ -88,13 +88,43 @@
 
 <style scoped>
   .pagination {
+    width: 100%;
     position: fixed;
+    bottom: 10rem;
     overflow: hidden;
     display: table;
-    bottom: 2%;
-    left: 25%;
-    /*width: 100%;*/
+    margin: 0 10%;
     height: 50px;
+    bottom: 2rem;
 }
-
+.pagination li {
+  list-style: none;
+  float: left;
+  height: 30px;
+  border-radius: 5px;
+  margin: 3px;
+  color: #666;
+}
+.pagination li:hover {
+  background: #000;
+}
+.pagination li:hover a {
+  color: #fff;
+}
+.pagination li a{
+  display: block;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 12px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.pagination .active {
+  background: #000;
+}
+.active a {
+  color: #fff;
+}
 </style>

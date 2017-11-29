@@ -25,7 +25,7 @@ exports.insert = function(req, res){      //添加用户
 exports.showlist = function(req, res){
     var page = parseInt(req.query.p, 10) || 0;   //当前页码
     var state = req.query.state;                // 分类 有通过、不通过、待审核
-    var count = 10;                              //每一页显示的数据条数
+    var count = 1;                              //每一页显示的数据条数
     var index = page * count;                      // 从index开始 到 index+5 结束
     var totalPage;                              // 总共有多少页
 

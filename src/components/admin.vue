@@ -4,21 +4,23 @@
         <div class="search-content">
             <div class="search-nav">
                 <input type="text" class="search-frame" placeholder="请输入名字" v-model="searchName">
-                <button class="search-btn btn btn-info" @click="search">搜索</button>
+                <button class="search-btn" @click="search">搜索</button>
             </div>
             <div class="search-result">
                 <div class="list-head">
-                    <span class="admin-text btn current" @click="selectChoice($event)">待审核</span>
-                    <span class="state-text btn" @click="selectChoice($event)">不通过</span>
-                    <span class="user-text btn" @click="selectChoice($event)">通过</span>
+                    <span class="admin-text current" @click="selectChoice($event)">待审核</span>
+                    <span class="state-text" @click="selectChoice($event)">不通过</span>
+                    <span class="user-text" @click="selectChoice($event)">通过</span>
                 </div>
                 <div class="userList">
                     <div class="userContainer" v-for='(user,index) in users' :style="{display:not_research}">
                         <div class="diplay-info">
                             <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
                             <span class="state">{{user.state}}</span>
-                            <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                            <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                            <div style="display:inline-block">
+                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                            </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
@@ -29,22 +31,24 @@
                         <div class="diplay-info">
                             <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
                             <span class="state">{{user.state}}</span>
-                            <span class="admin-btn btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                            <span class="admin-btn btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                            <div style="display:inline-block">
+                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                            </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
                             <p>身份证号：{{ user.IDCartNumber}}</p>
                         </div>
                     </div>
-                    <v-pagination  :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
+                    <v-pagination ref="child" :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
                 </div>
                 <div class="confirmFrame" v-bind:style="{display: valConfirm}">
                     <div class="confirm-wrap">
                         <span class="close" @click="closeConfirmFrame">关闭</span>
                         <p>确定让{{curUserName}}{{passText}}吗</p>
-                        <span class="btn btn-info" style="background-color:#5bc0de" @click="confirmInfo(curUserName,passText)">确定</span>
-                        <span class="btn btn-danger" style="background-color:#ddd" @click="closeConfirmFrame">取消</span>
+                        <span class="btnConfirm" style="background-color:#5bc0de" @click="confirmInfo(curUserName,passText)">确定</span>
+                        <span class="btnConfirm" style="background-color:#ddd" @click="closeConfirmFrame">取消</span>
                     </div>
                 </div>
             </div>
@@ -131,6 +135,8 @@ export default {
             }).then((res) => {
                 _self.users = res.data.users;
                 this.total = res.data.totalPage;
+                this.curPage = 1;
+                this.clickChild();
             })
         },
         search: function(){
@@ -150,7 +156,7 @@ export default {
         },
         pagechange:function(currentPage){
              // ajax请求, 向后台发送 currentPage, 来获取对应的数据
-             console.log("当前是第"+currentPage+"页");
+            console.log("当前是第"+currentPage+"页");
             this.$http({
                 url: '/user/admin',
                 method: 'GET',
@@ -161,6 +167,9 @@ export default {
             }).then((res) => {
                 this.users = res.data.users;
             })
+        },
+        clickChild: function() {
+            this.$refs.child.setCurrent(1);
         }
     },
     mounted: function() {
@@ -182,11 +191,11 @@ export default {
 </script>
 
 <style scoped>
-    .btn{
-        border: none;
+    .search-container {
+        font-size: 1rem;
     }
     .search-title {
-        font-size: 16px;
+        font-size: 1rem;
         margin: 15px auto;
         text-align: center;
     }
@@ -202,6 +211,8 @@ export default {
         height: 100%;
         margin-left: 15px;
         border: none;
+        outline: none;
+        background: #eee;
         border-bottom: 1px solid #a1d543;
     }
     .search-nav .search-btn { 
@@ -216,9 +227,8 @@ export default {
         text-align: center;
     }
     .search-result {
-        margin: 30px auto;
-        padding: 10px 20px;
-        width: 97%;
+        padding-top: 1rem;
+        width: 100%;
     }
     .search-result .list-head {
         width: 98%;
@@ -227,11 +237,12 @@ export default {
     }
     .search-result .list-head span{
         margin: 0 6%;
-        width: 4rem;
+        width: 30%;
         font-weight: bold;
         color: #000;
-        background: #f5f5f5;   
-        padding: 0;
+        background: #eee;
+        border-radius: .5rem;
+        padding: .2rem;
     }
     .search-result .list-head .current {
         background: #bce8f1;
@@ -239,38 +250,39 @@ export default {
     .search-result .userList {
         width: 100%;
         margin: 20px 0;
+        font-size: .85rem;
         text-align: center;
-        vertical-align: middle;
+        background: #fff;
+        padding: 1rem 0;
     }
     .search-result .userList .userContainer {
         margin-top: 10px;
     }
     .userContainer .display-info, .userContainer .user-info {
-        width: 30rem;
+        width: 3rem;
         height: 100%;
         margin: 0 20px 0 10px;
-        margin-left: 10px;
         border: 1px solid #e7e7e7;
     }
     .userContainer .user-info {
         width: 80%;
-        margin-top: 10px;
-        margin-left: 9%;
+        margin: 10px 1rem;
         text-align: center;
     }
-    .userContainer .diplay-info span{
-        margin: 0 4% 0 8%;
-        width: 4rem;
+    .userContainer .diplay-info>span{
+        margin: 0 2% 0 4%;
+        width: 25%;
         height: 20px;
         line-height: 20px;
+        float: left;
         color: #000;
         display: inline-block;
+        text-align: center;
     }
     .userContainer .diplay-info .admin-btn {
-        padding: 0;
         margin: 0;
         display: inline-block;
-        width: 4rem;
+        width: 3rem;
         background: #eee;
     }
     .userContainer .user-info p {
@@ -282,6 +294,7 @@ export default {
         height: 15%;
         left: 25%;
         top: 30%;
+        font-size: .85rem;
         position: absolute;
         vertical-align: middle;
         padding-top: 5%;
@@ -289,6 +302,7 @@ export default {
         z-index: 999;
     }
     .confirmFrame .confirm-wrap {
+        padding: 1rem 0;
         position: relative;
     }
     .confirm-wrap .close {
@@ -298,6 +312,13 @@ export default {
         position: absolute;
         right: 5px;
         top: -15px;
+    }
+    .confirm-wrap .btnConfirm {
+        display: inline-block;
+        width: 2rem;
+        height: 1.5rem;
+        border-radius: 5px;
+        margin: 1rem 5px 0 0;
     }
     .marsklayer {
         position: absolute;

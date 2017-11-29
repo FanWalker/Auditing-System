@@ -18,13 +18,12 @@ function rand(min, max) {
 function makeCapcha() {
     var img = new BMP24(100, 32 );
     //边框
-    img.drawRect(0, 0, img.w-1, img.h-1, rand(0, 0xffffff));
     //return img;
     //画曲线
     var w=img.w/2;
     var h=img.h;
     var color = rand(0, 0xffffff);
-    var y1=rand(-5,5); //Y轴位置调整
+    var y1=rand(0,8); //Y轴位置调整
     var w2=rand(10,15); //数值越小频率越高
     var h3=rand(4,6); //数值越小幅度越大
     var bl = rand(1,5);
@@ -44,19 +43,21 @@ function makeCapcha() {
     var x = 15, y=8;
     for(var i=0; i<str.length; i++){
         var f = fonts[Math.random() * fonts.length |0];
-        y = 8 + rand(-10, 10);
-        img.drawChar(str[i], x, y, f, rand(0, 0xffffff));
-        x += f.w + rand(2, 8);
+        y = 8 + rand(-10, 1);
+        img.drawChar(str[i], x, y, f, rand(-10, 0xffffff));
+        x += f.w + rand(2, 6);
     }
-    return img;
+    return {img: img, str: str};
 }
 
 
 exports.createCode = function (req,res) {
-  var img = makeCapcha();
-  const dataUrl = 'data:image/bmp;base64,' + img.getFileData().toString('base64');
-  res.setHeader('Content-Type', 'image/bmp');
-  res.send(dataUrl);
+    var bmp = makeCapcha()
+     img = bmp.img;
+     str = bmp.str;
+    const dataUrl = 'data:image/bmp;base64,' + img.getFileData().toString('base64');
+    res.setHeader('Content-Type', 'image/bmp');
+    res.send({url:dataUrl, str:str});
 }
 
 
