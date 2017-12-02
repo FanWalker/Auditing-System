@@ -73,12 +73,14 @@ export default {
             passText: '',
             users: [],
             searchResult: [],
+            curTarget: '',
             total: 0,     // 记录总条数
             curPage: 1,   // 当前的页数
         }
     },
     methods: {
         showDisplayInfo: function(e) {
+            this.curTarget = e;
             let current = $(e.target).parent().siblings()[0];
             let $current = $(current);
             if($current.css('display') === 'none'){
@@ -89,7 +91,7 @@ export default {
             }
         },
         showConfirmFrame: function(e,str) {
-            let cur_user = $(e.target).siblings()[0],
+            let cur_user = $(e.target).parent().siblings()[0],
                 $cur_user = $(cur_user);
             this.curUserName = $cur_user.text();
             this.valConfirm = '';
@@ -114,9 +116,10 @@ export default {
                     originstate: this.choice
                 }
             }).then((res)=>{
-                this.users = res.data;
-                console.log(this.users[0].name);
-                this.closeConfirmFrame()
+                this.users = res.data.users;
+                this.total = res.data.totalPage;
+                this.curPage = 1;
+                this.closeConfirmFrame();
             })
         },
         selectChoice: function(e) {
@@ -166,6 +169,7 @@ export default {
                 }
             }).then((res) => {
                 this.users = res.data.users;
+                this.showDisplayInfo(this.curTarget);
             })
         },
         clickChild: function() {
@@ -229,6 +233,8 @@ export default {
     .search-result {
         padding-top: 1rem;
         width: 100%;
+        height: 24.5rem;
+        overflow-y:scroll;
     }
     .search-result .list-head {
         width: 98%;

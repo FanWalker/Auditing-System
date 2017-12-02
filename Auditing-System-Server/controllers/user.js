@@ -25,7 +25,7 @@ exports.insert = function(req, res){      //添加用户
 exports.showlist = function(req, res){
     var page = parseInt(req.query.p, 10) || 0;   //当前页码
     var state = req.query.state;                // 分类 有通过、不通过、待审核
-    var count = 5;                              //每一页显示的数据条数
+    var count = 2;                              //每一页显示的数据条数
     var index = page * count;                      // 从index开始 到 index+5 结束
     var totalPage;                              // 总共有多少页
 
@@ -45,6 +45,7 @@ exports.update = function(req, res) {            //更新用户状态
     var curUserName = req.query.userName,
         updateState = req.query.state,
         originstate = req.query.originstate;
+    var count = 2;
 
     User.findOneAndUpdate({name: curUserName},{state:updateState},function(err, user){
         if(err){
@@ -57,7 +58,9 @@ exports.update = function(req, res) {            //更新用户状态
                         console.log(err)
                     }
                     else {
-                        res.send(users);
+                        var results = users.slice(0, count);      //返回count条数据
+                        totalPage = Math.ceil(users.length/count);          //返回总共有多少页
+                        res.send({users: results, totalPage: totalPage});  
                     }
                 })
         }
