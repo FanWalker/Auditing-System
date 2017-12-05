@@ -34,7 +34,12 @@
         </div>
       </div>
     </div>
-    <div class="submit-btn"><button type="button" class="btn btn-info" @click="submitInfo">提交</button></div>
+    <div class="submit-btn" ><button type="button" class="btn btn-info" @click="submitInfo">提交</button></div>
+    <div class="sucessMes" v-bind:style="{display: valSucess}">
+      <p>成功录入</p>
+      <span @click="sureSubmit">确定</span>
+    </div>
+    <div class="marsklayer" v-bind:style="{display: valMarklayer}"></div>
   </div>
 </template>
 
@@ -51,6 +56,8 @@ export default {
       idcartAlert: 'none',
       codeAlert: 'none',
       timeout: 'none',
+      valSucess: 'none',
+      valMarklayer: 'none',
       inputName: false,
       inputPhone: false,
       inputID: false,
@@ -66,10 +73,17 @@ export default {
     }
   },
   methods: {
+    sureSubmit :function() {
+      this.valMarklayer = 'none';
+      this.valSucess = 'none';
+      this.user = {};
+      this.inputCode = '';
+      this.getVerificationCode();
+    },
     submitInfo: function() {
       if(this.checkCode()){
         var timeDiff = parseInt(new Date()- this.originTime)/1000;
-        if(timeDiff<30){
+        if(timeDiff<50){
           this.$http({
           url: '/user/new',
           method: 'POST',
@@ -77,8 +91,10 @@ export default {
             user: this.user
           }
           }).then((res) => {
+            this.valSucess = '';
+            this.valMarklayer = '';
             let data = res.data;
-            console.log(data);
+            console.log("heolo"+data);
           })
         }else {
           this.timeout = ''
@@ -182,11 +198,6 @@ export default {
   mounted: function(){
       this.getVerificationCode()
     },
-  computed: {
-    codevalue: function(){
-      
-    }
-  }
 }
 </script>
 
@@ -227,33 +238,33 @@ export default {
     margin-left: .85rem;
     float: left;
     width: 30%;
-    text-align: left;
-  }
-  .wrap input {
-    width: 65%;
     height: 2rem;
-    border: none;
-    outline: none;
+    text-align: left;
+    box-sizing: border-box;
   }
   .input_wrap  {
+    float: left;
     position: relative;
     display: inline-block;
+    box-sizing: border-box;
     width: 65%;
-    height: 30px;
-    line-height: 30px;
+    height: 2rem;
+    line-height: 20px;
     padding: 0;
-    margin: 0;
   }
   .input_wrap input {
     display: inline-block;
-    float: left;
-    width: 70%;
+    box-sizing: border-box;
+    outline: none;
+    border: none;
+    width: 65%;
     margin: 0;
+    height: 2rem;
     float: left;
   }
   .yanzhengma {
-    float: right;
-    width: 30%;
+    float: left;
+    width: 2rem;
     height: 30px;
     padding: 0;
     margin: 0;
@@ -276,5 +287,36 @@ export default {
     position: absolute;
     left: 0;
     top: -25px;
+  }
+  .sucessMes {
+    padding: 1rem 0 0 0;
+    width: 30%;
+    height: 4rem;
+    border-radius: 1rem;
+    background: #caeadf;
+    position: absolute;
+    left: 35%;
+    top: 30%;
+    font-size: 1rem;
+    z-index: 999;
+  }
+  .sucessMes span {
+    display: inline-block;
+    width: 2rem;
+    height: 1rem;
+    line-height: 1rem;
+    font-size: .9rem;
+    margin-top: 1rem;
+    color: #44d5cf;
+  }
+  .marsklayer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 998;
+    opacity: 0.5;
+    background: #eee;
   }
 </style>

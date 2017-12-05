@@ -14,7 +14,7 @@ exports.insert = function(req, res){      //添加用户
             var user = new User(_user);
             user.save(function(err, user){
                 if(err){
-                    console.log(err);
+                    res.send(err);
                 }else{
                     res.json({message: '成功录入'});
                 }

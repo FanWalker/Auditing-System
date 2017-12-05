@@ -12,4 +12,5 @@ app.listen(port, function(){
     console.log('server start on ' + port);
 });
 
+app.use(express.static('public'))
 require('./route')(app);

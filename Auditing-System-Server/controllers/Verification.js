@@ -16,11 +16,11 @@ function rand(min, max) {
 
 //制造验证码图片
 function makeCapcha() {
-    var img = new BMP24(100, 32 );
+    var img = new BMP24(84, 32 );
     //边框
     //return img;
     //画曲线
-    var w=img.w/2;
+    var w=img.w/3;
     var h=img.h;
     var color = rand(0, 0xffffff);
     var y1=rand(0,8); //Y轴位置调整
