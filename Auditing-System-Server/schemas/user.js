@@ -6,6 +6,7 @@ const userSchema = new Schema({
     phoneNumber: {type: String},
     IDCartNumber: {type: String},
     state: {type: String,default:'待审核'},
+    station: {type: String},
     // meta 更新或录入数据的时间记录
     meta: {
         createAt: {

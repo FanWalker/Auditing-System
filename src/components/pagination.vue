@@ -27,15 +27,14 @@
         type: Number,
         default: 1
       },
-      pagegroup: {// 分页条数
+      pagegroup: {// 分页号
         type: Number,
-        default: 3,
+        default: 3, //默认显示3个分页号
         coerce: function (v) {
           v = v > 0 ? v : 3;
           return v % 2 === 1 ? v : v + 1;
         }
-      },
-
+      }
     },
     computed: {
       page: function () { // 总页数
@@ -87,7 +86,7 @@
 </script>
 
 <style scoped>
-  .pagination {
+.pagination {
     width: 100%;
     position: fixed;
     bottom: 10rem;

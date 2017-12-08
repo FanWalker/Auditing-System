@@ -3,7 +3,7 @@ var User = require('../models/user');
 exports.insert = function(req, res){      //添加用户
     var _user = JSON.parse(req.query.user);
 
-    User.findOne({name: _user.name}, function(err,user){
+    User.findOne({name: _user.IDCartNumber}, function(err,user){
         if(err){
             console.log(err);
         }
@@ -69,13 +69,22 @@ exports.update = function(req, res) {            //更新用户状态
 
 exports.search = function (req, res) {      //用户的查询
     var searchName = req.query.userName;
+    var page = parseInt(req.query.p, 10) || 0;   //当前页码
+    console.log(page);
+    var count = 5;                              //每一页显示的数据条数
+    var index = page * count;                      // 从index开始 到 index+5 结束
+    var totalPage;  
 
-    User.findOne({name: searchName},function(err, user){
-        if(user == '') {
-            res.send("查找失败！");
-        }
-        else {
-            res.send(user);
-        }
+    User.find({name: searchName})
+        .exec(function(err, users){
+            if(users.length == 0 ) {
+                res.send("error");
+            }
+            else {
+                var results = users.slice(index, index+count);      //返回count条数据
+                totalPage = Math.ceil(users.length/count);
+                console.log(results);   
+                res.send({users: results, totalPage: totalPage});
+            }
     })
 }

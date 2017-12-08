@@ -9,28 +9,37 @@
             <div class="search-result"  v-if="searchResult.length>0">
                 <div class="search_head">
                     <div class="userName">姓名</div>
+                    <div class="userPhone">手机号</div>
                     <div class="userState">审核结果</div>
                 </div>
-               <div v-for="user in searchResult">
+               <div class="userDisplay" v-for="user in searchResult">
                    <div class="userName">{{user.name}}</div>
+                   <div class="userPhone">{{showphone(user)}}</div>
                    <div class="userState">{{user.state}}</div>
                </div>
             </div>
             <div class="errInfo">
                 {{errInfo}}
             </div>
+           <v-pagination  v-if="total>0" ref="child" :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
         </div>
     </div>
 </template>
 
 <script>
+import pagination from '@/components/pagination'
+
     export default {
         name: 'searchVue',
         data() {
             return {
                 searchResult: [],
                 searchName: '',
-                errInfo: ''
+                errInfo: '',
+                phone: '',
+                curTarget: '',
+                total: 0,     // 记录总条数
+                curPage: 1,   // 当前的页数
             }
         },
         methods: {
@@ -43,16 +52,42 @@
                         userName: this.searchName
                     }
                 }).then((res)=>{
-                    if(res.data == ''){
+                    if(res.data == "error"){
                         this.errInfo = '查无此人，请重新输入！'
                         $(".search-frame").focus();
                     }
                     else{
-                        this.searchResult.push(res.data);
-                        console.log(this.searchResult.length)
+                        this.errInfo = '';
+                        this.searchResult=res.data.users;
+                        this.total = res.data.totalPage;
+                        if(this.total>0){
+                            this.clickChild();      
+                        }
                     }
                     })
+            },
+            pagechange:function(currentPage){
+             // ajax请求, 向后台发送 currentPage, 来获取对应的数据
+                this.$http({
+                    url: '/user/admin/search',
+                    method: 'GET',
+                    params: {
+                        userName: this.searchName,
+                        p: currentPage-1
+                    }
+                }).then((res) => {
+                    this.searchResult = res.data.users;
+                })
+            },
+            showphone: function(user) {
+                return user.phoneNumber.replace(/\d{7}(\d{4})/, '*******$1');;
+            },
+            clickChild: function() {
+                this.$refs.child.setCurrent(1);
             }
+        },
+        components: {
+            'v-pagination': pagination,
         }
     }
 </script>
@@ -86,18 +121,31 @@
     }
     .search-result {
         margin: 2rem 0;
+        font-size: .85rem;
         padding: 0;
         background: #fff;
+        box-sizing: border-box;
+        height: 19rem;
+        overflow: hidden;
     }
     .search-result .search_head {
         font-size: 1rem;
         font-weight: bold;
+        width: 100%;
     }
-    .userName, .userState {
-        width: 20%;
+    .userName, .userState, .userPhone{
+        width: 4rem;
+        height: 1rem;
         display: inline-block;
         text-align: left;
-        margin: 1rem 2rem;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    .userDisplay {
+        margin-left: 1rem;
+    }
+    .userDisplay .userPhone {
+        margin-right: 1.5rem;
     }
     .errInfo {
         width: 50%;

@@ -1,7 +1,16 @@
 <template>
   <div class="identity">
     <router-link to="/search">Go to search</router-link>
-    <div class="message"><p>{{ msg }}</p></div>
+    <div class="message">
+      <p>您正在参与广州途客广州
+        <span class="selectWrap">
+          <select class="selection" v-model="user.station" onmousedown="if(this.options.length>6){this.size=10}" onblur="this.size=0" onchange="this.size=0">
+            <option v-for="place in places">{{place}}</option>
+          </select>
+        </span>
+        站的骑手审核，请正确填写并提交一下表格，以免耽误入职进度
+      </p>
+    </div>
     <div class="form-data">
       <div class="wrap">
         <label for="" class="text-name">姓名<span>*</span></label>
@@ -36,7 +45,7 @@
     </div>
     <div class="submit-btn" ><button type="button" class="btn btn-info" @click="submitInfo">提交</button></div>
     <div class="sucessMes" v-bind:style="{display: valSucess}">
-      <p>成功录入</p>
+      <p>{{info}}</p>
       <span @click="sureSubmit">确定</span>
     </div>
     <div class="marsklayer" v-bind:style="{display: valMarklayer}"></div>
@@ -48,8 +57,6 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: '您正在参与广州途客[广州]猎德站站的骑手审核，请正确填写并提交一下表格，以免耽误入职进度',
-      code: '',
       inputCode: '',
       nameAlert: 'none',
       phoneAlert: 'none',
@@ -65,10 +72,13 @@ export default {
       originTime: '',
       verificationCode: '',
       dataUrl: '',
+      places: [],
+      info: '',
       user: {
         name: '',
         phoneNumber: '',
-        IDCartNumber: ''
+        IDCartNumber: '',
+        station: '陈家祠'
       }
     }
   },
@@ -78,6 +88,7 @@ export default {
       this.valSucess = 'none';
       this.user = {};
       this.inputCode = '';
+      this.user.station = '陈家祠';
       this.getVerificationCode();
     },
     submitInfo: function() {
@@ -91,10 +102,11 @@ export default {
             user: this.user
           }
           }).then((res) => {
-            this.valSucess = '';
-            this.valMarklayer = '';
-            let data = res.data;
-            console.log("heolo"+data);
+            if(res.data){
+              this.info = res.data.message;
+              this.valSucess = '';
+              this.valMarklayer = '';
+            }
           })
         }else {
           this.timeout = ''
@@ -122,13 +134,13 @@ export default {
       var phone = this.user.phoneNumber;
       var $e = $("#userphone");
       if(phone.length<11 || !reg.test(phone)) {
-        $e.focus();
+        //$e.focus();
         $e.css("color","#ec150e");
         this.phoneAlert = '';
       }
       else {
         this.inputPhone = true;
-        $e.blur();
+        //$e.blur();
         $e.css("color","#000");
         this.phoneAlert = 'none';
       }
@@ -140,12 +152,12 @@ export default {
       var IDCartNumber = this.user.IDCartNumber;
       if(isIDCard1.test(IDCartNumber) || isIDCard2.test(IDCartNumber)) {
         this.inputID = true;
-        $e.blur();
+        //$e.blur();
         $e.css("color","#000");
         this.idcartAlert = 'none';
       }
       else {
-        $e.focus();
+        //$e.focus();
         $e.css("color","#ec150e");
         this.idcartAlert = '';
       }
@@ -155,13 +167,13 @@ export default {
           textCode2 = this.verificationCode.toLowerCase();
       var $e = $('#verification')
       if(textCode2 != textCode1){
-        $e.focus();
+        //$e.focus();
         $e.css("color","#ec150e");
         this.codeAlert = '';
       }
       else {
         this.inputVeri = true;
-        $e.blur();
+        //$e.blur();
         $e.css("color","#000");
         this.codeAlert = 'none';
       }
@@ -193,10 +205,18 @@ export default {
         this.originTime = new Date();
         console.log(this.verificationCode);
       })
+    },
+    alertchange: function(e){
+      console.log($(e.target).selected)
+      this.size = 0;
+      console.log(this.selected);
     }
   },
   mounted: function(){
-      this.getVerificationCode()
+      this.getVerificationCode(),
+      this.places = ['陈家祠','窖口','流花','三元里','云台一','梅花园','京溪','嘉禾','云台二','荔城','万博',
+                     '钟村','香雪牌坊','黄埔二','黄埔','猎德1','黄村','猎德2','燕塘','花城汇','体育中心',
+                     '动物园','淘金','南越宫','南越宫2','东山2','东山','东山口','新港西','琶洲','客村']
     },
 }
 </script>
@@ -278,9 +298,10 @@ export default {
   }
   .submit-btn button{
     width: 100%;
-    font-size: 1.3rem;
+    font-size: 1rem;
     background: #44d5cf;
     border: none;
+    padding: 7px 0;
   }
   .dangerInfo {
     font-size: 10px;
@@ -318,5 +339,22 @@ export default {
     z-index: 998;
     opacity: 0.5;
     background: #eee;
+  }
+  .message .selectWrap {
+    width: 4rem;
+    height: 1.5rem;
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .selection {
+    position: absolute;
+    z-index: 100;
+    width: 4rem;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
   }
 </style>

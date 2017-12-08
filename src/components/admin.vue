@@ -9,7 +9,7 @@
             <div class="search-result">
                 <div class="list-head">
                     <span class="admin-text current" @click="selectChoice($event)">待审核</span>
-                    <span class="state-text" @click="selectChoice($event)">不通过</span>
+                    <span class="state-text" @click="selectChoice($event)">驳回</span>
                     <span class="user-text" @click="selectChoice($event)">通过</span>
                 </div>
                 <div class="userList">
@@ -19,12 +19,13 @@
                             <span class="state">{{user.state}}</span>
                             <div style="display:inline-block">
                                 <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">驳回</span>
                             </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
                             <p>身份证号：{{ user.IDCartNumber}}</p>
+                            <p>站点：{{ user.station }}</p>
                         </div>
                     </div>
                     <div class="userContainer" v-for='user in searchResult' :style="{display: had_research}">
@@ -33,15 +34,16 @@
                             <span class="state">{{user.state}}</span>
                             <div style="display:inline-block">
                                 <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">不通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">驳回</span>
                             </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
                             <p>手机号码：{{ user.phoneNumber }}</p>
                             <p>身份证号：{{ user.IDCartNumber}}</p>
+                            <p>站点：{{user.station}}</p>
                         </div>
                     </div>
-                    <v-pagination ref="child" :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
+                    <v-pagination  v-if="total>0" ref="child" :total="total" :current-page='curPage' @pagechange="pagechange"></v-pagination>
                 </div>
                 <div class="confirmFrame" v-bind:style="{display: valConfirm}">
                     <div class="confirm-wrap">
@@ -68,6 +70,7 @@ export default {
             choice: '待审核',
             curUserName: '',
             searchName: '',
+            valSearch: '',
             not_research: '',
             had_research: 'none',
             passText: '',
@@ -89,6 +92,7 @@ export default {
             else {
                 $current.css('display','none');
             }
+            
         },
         showConfirmFrame: function(e,str) {
             let cur_user = $(e.target).parent().siblings()[0],
@@ -99,7 +103,7 @@ export default {
             if(str == 'pass'){
                 this.passText = '通过'
             }else {
-                this.passText = '不通过'
+                this.passText = '驳回'
             }
         },
         closeConfirmFrame: function() {
@@ -139,7 +143,9 @@ export default {
                 _self.users = res.data.users;
                 this.total = res.data.totalPage;
                 this.curPage = 1;
-                this.clickChild();
+                if(this.total>0){
+                    this.clickChild();      
+                }
             })
         },
         search: function(){
@@ -154,12 +160,18 @@ export default {
                     userName: this.searchName
                 }
             }).then((res)=>{
-                this.searchResult.push(res.data);
+                this.valSearch = 'none';
+                this.searchResult = res.data.users;
+                this.total = res.data.totalPage;
+                this.curPage = 1;
+                if(this.total>0){
+                    this.clickChild();      
+                }
             })
         },
         pagechange:function(currentPage){
              // ajax请求, 向后台发送 currentPage, 来获取对应的数据
-            console.log("当前是第"+currentPage+"页");
+            this.showDisplayInfo('');
             this.$http({
                 url: '/user/admin',
                 method: 'GET',
@@ -169,7 +181,7 @@ export default {
                 }
             }).then((res) => {
                 this.users = res.data.users;
-                this.showDisplayInfo(this.curTarget);
+                $(".user-info").css("display","none");
             })
         },
         clickChild: function() {
@@ -233,7 +245,7 @@ export default {
     .search-result {
         padding-top: 1rem;
         width: 100%;
-        height: 24.5rem;
+        height: 19rem;
         overflow-y:scroll;
     }
     .search-result .list-head {
@@ -303,6 +315,7 @@ export default {
         font-size: .85rem;
         position: absolute;
         vertical-align: middle;
+        border-radius: 1rem;
         padding-top: 5%;
         background: #bce8f1;
         z-index: 999;
@@ -324,7 +337,7 @@ export default {
         width: 2rem;
         height: 1.5rem;
         border-radius: 5px;
-        margin: 1rem 5px 0 0;
+        margin: .85rem 5px 0 0;
     }
     .marsklayer {
         position: absolute;
