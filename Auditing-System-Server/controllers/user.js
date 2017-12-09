@@ -25,11 +25,12 @@ exports.insert = function(req, res){      //添加用户
 exports.showlist = function(req, res){
     var page = parseInt(req.query.p, 10) || 0;   //当前页码
     var state = req.query.state;                // 分类 有通过、不通过、待审核
+    var station = req.query.station;
     var count = 2;                              //每一页显示的数据条数
     var index = page * count;                      // 从index开始 到 index+5 结束
     var totalPage;                              // 总共有多少页
 
-    User.find({state:state})                //找到 对应状态的user
+    User.find({state:state,station:station})                //找到 对应状态的user
         .exec(function(err, users){
             if(err) {
                 console.log(err);
@@ -42,17 +43,18 @@ exports.showlist = function(req, res){
         })
 }
 exports.update = function(req, res) {            //更新用户状态
-    var curUserName = req.query.userName,
+    var curUserID = req.query.userID,
         updateState = req.query.state,
+        station = req.query.station,
         originstate = req.query.originstate;
     var count = 2;
 
-    User.findOneAndUpdate({name: curUserName},{state:updateState},function(err, user){
+    User.findOneAndUpdate({IDCartNumber: curUserID},{state:updateState},function(err, user){
         if(err){
             console.log(err);
         }
         else {
-            User.find({state: originstate})
+            User.find({state: originstate,station: station})
                 .exec(function(err, users){
                     if(err){
                         console.log(err)

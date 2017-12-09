@@ -11,6 +11,11 @@
                     <span class="admin-text current" @click="selectChoice($event)">待审核</span>
                     <span class="state-text" @click="selectChoice($event)">驳回</span>
                     <span class="user-text" @click="selectChoice($event)">通过</span>
+                    <span class="selectWrap">
+                      <select class="selection" v-model="station" onmousedown="if(this.options.length>6){this.size=10}" onblur="this.size=0" onchange="this.size=0" @change="selectChoice('')">
+                        <option v-for="place in places">{{place}}</option>
+                      </select>
+                    </span>
                 </div>
                 <div class="userList">
                     <div class="userContainer" v-for='(user,index) in users' :style="{display:not_research}">
@@ -18,8 +23,8 @@
                             <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
                             <span class="state">{{user.state}}</span>
                             <div style="display:inline-block">
-                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">驳回</span>
+                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame(user,'pass')">通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame(user,'nopass')">驳回</span>
                             </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
@@ -33,8 +38,8 @@
                             <span class="userName" @click="showDisplayInfo($event)">{{user.name}}</span>
                             <span class="state">{{user.state}}</span>
                             <div style="display:inline-block">
-                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame($event,'pass')">通过</span>
-                                <span class="admin-btn" @click="showConfirmFrame($event,'nopass')">驳回</span>
+                                <span class="admin-btn" style="background-color:#bce8f1" @click="showConfirmFrame(user,'pass')">通过</span>
+                                <span class="admin-btn" @click="showConfirmFrame(user,'nopass')">驳回</span>
                             </div>
                         </div>
                         <div class="user-info" v-bind:style="{display: valDisplay}">
@@ -48,8 +53,8 @@
                 <div class="confirmFrame" v-bind:style="{display: valConfirm}">
                     <div class="confirm-wrap">
                         <span class="close" @click="closeConfirmFrame">关闭</span>
-                        <p>确定让{{curUserName}}{{passText}}吗</p>
-                        <span class="btnConfirm" style="background-color:#5bc0de" @click="confirmInfo(curUserName,passText)">确定</span>
+                        <p>确定让{{name}}{{passText}}吗</p>
+                        <span class="btnConfirm" style="background-color:#5bc0de" @click="confirmInfo(curUserID,passText)">确定</span>
                         <span class="btnConfirm" style="background-color:#ddd" @click="closeConfirmFrame">取消</span>
                     </div>
                 </div>
@@ -68,13 +73,16 @@ export default {
             valConfirm: 'none',
             valMarklayer: 'none',
             choice: '待审核',
-            curUserName: '',
+            curUserID: '',
             searchName: '',
             valSearch: '',
             not_research: '',
             had_research: 'none',
             passText: '',
             users: [],
+            name: '',
+            places: [],
+            station: '陈家祠',
             searchResult: [],
             curTarget: '',
             total: 0,     // 记录总条数
@@ -94,10 +102,9 @@ export default {
             }
             
         },
-        showConfirmFrame: function(e,str) {
-            let cur_user = $(e.target).parent().siblings()[0],
-                $cur_user = $(cur_user);
-            this.curUserName = $cur_user.text();
+        showConfirmFrame: function(user,str) {
+            this.name = user.name;
+            this.curUserID = user.IDCartNumber;
             this.valConfirm = '';
             this.valMarklayer = '';
             if(str == 'pass'){
@@ -110,14 +117,15 @@ export default {
             this.valConfirm = 'none';
             this.valMarklayer = 'none';
         },
-        confirmInfo: function(user, newstate) {
+        confirmInfo: function(userid, newstate) {
             this.$http({
                 url: '/user/admin/update',
                 method: 'POST',
                 params: {
-                    userName: user,
+                    userID: userid,
                     state: newstate,
-                    originstate: this.choice
+                    originstate: this.choice,
+                    station: this.station
                 }
             }).then((res)=>{
                 this.users = res.data.users;
@@ -130,14 +138,16 @@ export default {
             var _self = this;
             _self.not_research = '';
             _self.had_research = 'none';
-            _self.choice = $(e.target).text();
+            var _choice = $(e.target).text();
+            _self.choice = _choice == "" ? this.choice : _choice;
             $(e.target).siblings().removeClass('current');
             $(e.target).addClass('current');
             _self.$http({
                 url: '/user/admin',
                 method: 'GET',
                 params: {
-                    state: _self.choice
+                    state: _self.choice,
+                    station: _self.station
                 }
             }).then((res) => {
                 _self.users = res.data.users;
@@ -177,6 +187,7 @@ export default {
                 method: 'GET',
                 params: {
                     state: this.choice,
+                    station: this.station,
                     p: currentPage-1
                 }
             }).then((res) => {
@@ -189,11 +200,15 @@ export default {
         }
     },
     mounted: function() {
+        this.places = ['陈家祠','窖口','流花','三元里','云台一','梅花园','京溪','嘉禾','云台二','荔城','万博',
+                '钟村','香雪牌坊','黄埔二','黄埔','猎德1','黄村','猎德2','燕塘','花城汇','体育中心',
+                '动物园','淘金','南越宫','南越宫2','东山2','东山','东山口','新港西','琶洲','客村'];
         this.$http({
             url: '/user/admin',
             method: 'GET',
             params: {
-                state: "待审核"
+                state: "待审核",
+                station: this.station
             }
         }).then((res) => {
             this.users = res.data.users;
@@ -250,17 +265,34 @@ export default {
     }
     .search-result .list-head {
         width: 98%;
-        margin-left: 2px;
+        margin-left: 2rem;
         text-align: center;  
     }
     .search-result .list-head span{
-        margin: 0 6%;
+        margin: 0 3%;
         width: 30%;
         font-weight: bold;
         color: #000;
         background: #eee;
         border-radius: .5rem;
         padding: .2rem;
+    }
+    .list-head .selectWrap {
+        width: 4rem;
+        height: 1.5rem;
+        display: inline-block;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        text-align: left;
+        vertical-align: middle;
+    }
+    .selection {
+        position: absolute;
+        z-index: 100;
+        width: 4rem;
+        scroll-behavior: smooth;
+        overflow-y: scroll;
     }
     .search-result .list-head .current {
         background: #bce8f1;
